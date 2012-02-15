@@ -197,15 +197,11 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    #find list of possible ghost locations in next step
-    #find list of possible pacman action for next step
-    #for each possible pacman action, average the evaulated value for each possible ghost location configuration
-    #chose action with highestavg
 
     legalActions = gameState.getLegalActions()
     successorStates = [gameState.generateSuccessor(0, action)
                        for action in legalActions]
-    actionScores = [self.getValue(successorState, self.depth, False)
+    actionScores = [self.getValue(successorState, self.depth, True)
                     for successorState in successorStates]
     bestScore = max(actionScores)
     bestIndices = [index
