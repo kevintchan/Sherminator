@@ -133,16 +133,11 @@ class MultiAgentSearchAgent(Agent):
     self.depth = int(depth)
 
 class MinimaxAgent(MultiAgentSearchAgent):
-  "gotok"
 
   def getAction(self, gameState):
     """
       Returns the minimax action from the current gameState using self.depth
       and self.evaluationFunction.
-
-      gameState.getLegalActions(agentIndex):
-      gameState.generateSuccessor(agentIndex, action):
-      gameState.getNumAgents():
     """
     legalActions = gameState.getLegalActions()
     successorStates = [gameState.generateSuccessor(0, action)
@@ -163,36 +158,31 @@ class MinimaxAgent(MultiAgentSearchAgent):
     if (depth == 0 or (not legalActions)):
       return self.evaluationFunction(gameState)
 
-    successorStates = [gameState.generateSuccessor(agentIndex, action)
-                       for action in legalActions]
-
+    "prepare recursive call"
     if (agentIndex == (gameState.getNumAgents() - 1)):
-      "decrement depth for last agent"
       nextDepth = depth - 1
       nextAgent =  0
     else:
       nextDepth = depth
       nextAgent = agentIndex + 1
 
+    successorStates = [gameState.generateSuccessor(agentIndex, action)
+                       for action in legalActions]
     values = [self.getValue(successorState, nextDepth, nextAgent)
               for successorState in successorStates]
-
     if (agentIndex == 0):
       return max(values)
     else:
       return min(values)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
-  """
-    Your minimax agent with alpha-beta pruning (question 3)
-  """
+  "gotok"
 
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
