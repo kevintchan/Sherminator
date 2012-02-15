@@ -37,12 +37,17 @@ class ReflexAgent(Agent):
 
     # Choose one of the best actions
     scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+    """
+    print scores
+    print legalMoves
+    """
     bestScore = max(scores)
     bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
     chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
     "Add more of your code here if you want to"
-
+    
+    print legalMoves[chosenIndex]
     return legalMoves[chosenIndex]
 
   def evaluationFunction(self, currentGameState, action):
@@ -64,11 +69,39 @@ class ReflexAgent(Agent):
     successorGameState = currentGameState.generatePacmanSuccessor(action)
     newPos = successorGameState.getPacmanPosition()
     newFood = successorGameState.getFood()
+    currentNumFood = currentGameState.getNumFood()
+    newNumFood = successorGameState.getNumFood()
     newGhostStates = successorGameState.getGhostStates()
+    newGhostPositions = [ghostState.getPosition() for ghostState in newGhostStates]
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-    "*** YOUR CODE HERE ***"
-    return successorGameState.getScore()
+    "determine if in range of ghost"
+    distToNearestGhost = self.distToNearestPos(newPos, newGhostPositions)
+    if (distToNearestGhost < 2):
+      return -1
+    
+    if (newNumFood < currentNumFood):
+      return 1
+
+    if (newFood.asList()):
+      distToNearestFood = self.distToNearestPos(newPos, newFood.asList())
+      returnVal = float(1) / float(distToNearestFood)
+    else:
+      returnVal = 2
+
+    return returnVal
+
+  def distToNearestPos(self, pacmanPosition, positions):
+    minDist = None
+    for position in positions:
+      dist = distCalc(pacmanPosition, position)
+      if ((minDist == None) or dist < minDist):
+        minDist = dist
+    
+    return minDist
+
+def distCalc(pos1, pos2):
+  return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 def scoreEvaluationFunction(currentGameState):
   """
