@@ -268,7 +268,7 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  #util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
