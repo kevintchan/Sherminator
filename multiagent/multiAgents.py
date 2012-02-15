@@ -8,7 +8,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 
 from game import Agent
 
@@ -207,7 +207,47 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+        #find list of possible ghost locations in next step
+    #find list of possible pacman action for next step
+    #for each possible pacman action, average the evaulated value for each possible ghost location configuration
+    #chose action with highestavg
+
+    state = gameState
+    for couter in range(0, self.depth):
+      (act, state) = self.expMinMaxHelper(state)
+    return act
+
+
+  def expMinMaxHelper(self, gameState):
+    pacmanLegalActs = gameState.getLegalActions(0)
+    numOfGhosts = gameState.getNumAgents() - 1
+    possibleNextGameStates = [gameState]
+    newPossibleNextGameStates = []
+    for ghostNum in range(1, numOfGhosts + 1):
+      for state in possibleNextGameStates:
+        ghostLegalActs = state.getLegalActions(ghostNum)
+        for action in ghostLegalActs:
+          newState = state.generateSuccessor(ghostNum, action)
+          newPossibleNextGameStates.append(newState)
+      possibleNextGameStates = newPossibleNextGameStates[:]
+      newPossibleNextGameStates = []
+    numOfPossibleGhostPositions = len(possibleNextGameStates)
+    print numOfPossibleGhostPositions
+    highestAvg = -sys.maxint - 1
+    actionWithHighestAvg = None
+    stateWithHighestAvg = None
+    newState = None
+    for action in pacmanLegalActs:
+      sumOfEval = 0
+      for state in newPossibleNextGameStates:
+        newState = state.generateSuccessor(0, action)
+        sumOfEval += self.evaluationFunction(newState)
+      avgEval = sumOfEval / numOfPossibleGhostPositions
+      if avgEval > highestAvg:
+        avgEval = highestAvg
+        actionWithHighestAvg = action
+        stateWithHighestAvg = newState
+    return (actionWithHighestAvg, stateWithHighestAvg)
 
 def betterEvaluationFunction(currentGameState):
   """
