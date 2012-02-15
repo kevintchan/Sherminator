@@ -207,47 +207,68 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-        #find list of possible ghost locations in next step
+    #find list of possible ghost locations in next step
     #find list of possible pacman action for next step
     #for each possible pacman action, average the evaulated value for each possible ghost location configuration
     #chose action with highestavg
 
-    state = gameState
-    for couter in range(0, self.depth):
-      (act, state) = self.expMinMaxHelper(state)
-    return act
+    legalActions = gameState.getLegalActions()
+    successorStates = [gameState.generateSuccessor(0, action)
+                       for action in legalActions]
+    actionScores = [self.getValue(successorState, self.depth, False)
+                    for successorState in successorStates]
+    bestScore = max(actionScores)
+    bestIndices = [index
+                   for index in range(len(actionScores))
+                   if actionScores[index] == bestScore]
+    chosenIndex = random.choice(bestIndices)
+    return legalActions[chosenIndex]
+
+  def getValue(self, gameState, depth, isPacman):
+
+    legalActions = True
+
+    if not isPacman:
+      legalActions = gameState.getLegalActions(0)
+      successorStates = [gameState.generateSuccessor(0, action)
+                       for action in legalActions]
+      nextDepth = depth - 1
+      isPacman = True
+    else:
+      successorStates = self.expMinMaxHelper(gameState)
+      nextDepth = depth
+      isPacman = False
+
+    if (depth == 0 or (not legalActions)):
+      return self.evaluationFunction(gameState)
+
+    values = [self.getValue(successorState, nextDepth, isPacman)
+              for successorState in successorStates]
+
+    if isPacman:
+      return max(values)
+    else:
+      return (sum(values)/len(values))
 
 
   def expMinMaxHelper(self, gameState):
-    pacmanLegalActs = gameState.getLegalActions(0)
     numOfGhosts = gameState.getNumAgents() - 1
     possibleNextGameStates = [gameState]
     newPossibleNextGameStates = []
     for ghostNum in range(1, numOfGhosts + 1):
       for state in possibleNextGameStates:
         ghostLegalActs = state.getLegalActions(ghostNum)
-        for action in ghostLegalActs:
-          newState = state.generateSuccessor(ghostNum, action)
-          newPossibleNextGameStates.append(newState)
+        if len(ghostLegalActs) is not 0:
+          for action in ghostLegalActs:
+            newState = state.generateSuccessor(ghostNum, action)
+            newPossibleNextGameStates.append(newState)
+        else:
+          newPossibleNextGameStates = possibleNextGameStates[:]
       possibleNextGameStates = newPossibleNextGameStates[:]
       newPossibleNextGameStates = []
-    numOfPossibleGhostPositions = len(possibleNextGameStates)
-    print numOfPossibleGhostPositions
-    highestAvg = -sys.maxint - 1
-    actionWithHighestAvg = None
-    stateWithHighestAvg = None
-    newState = None
-    for action in pacmanLegalActs:
-      sumOfEval = 0
-      for state in newPossibleNextGameStates:
-        newState = state.generateSuccessor(0, action)
-        sumOfEval += self.evaluationFunction(newState)
-      avgEval = sumOfEval / numOfPossibleGhostPositions
-      if avgEval > highestAvg:
-        avgEval = highestAvg
-        actionWithHighestAvg = action
-        stateWithHighestAvg = newState
-    return (actionWithHighestAvg, stateWithHighestAvg)
+    return possibleNextGameStates
+
+
 
 def betterEvaluationFunction(currentGameState):
   """
