@@ -37,17 +37,16 @@ class ReflexAgent(Agent):
 
     # Choose one of the best actions
     scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
-    """
-    print scores
-    print legalMoves
-    """
     bestScore = max(scores)
     bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
     chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
     "Add more of your code here if you want to"
-    
+    """
+    print scores
+    print legalMoves
     print legalMoves[chosenIndex]
+    """
     return legalMoves[chosenIndex]
 
   def evaluationFunction(self, currentGameState, action):
@@ -134,32 +133,54 @@ class MultiAgentSearchAgent(Agent):
     self.depth = int(depth)
 
 class MinimaxAgent(MultiAgentSearchAgent):
-  """
-    Your minimax agent (question 2)
-  """
+  "gotok"
 
   def getAction(self, gameState):
     """
       Returns the minimax action from the current gameState using self.depth
       and self.evaluationFunction.
 
-      Here are some method calls that might be useful when implementing minimax.
-
       gameState.getLegalActions(agentIndex):
-        Returns a list of legal actions for an agent
-        agentIndex=0 means Pacman, ghosts are >= 1
-
-      Directions.STOP:
-        The stop direction, which is always legal
-
       gameState.generateSuccessor(agentIndex, action):
-        Returns the successor game state after an agent takes an action
-
       gameState.getNumAgents():
-        Returns the total number of agents in the game
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    legalActions = gameState.getLegalActions()
+    successorStates = [gameState.generateSuccessor(0, action)
+                       for action in legalActions]
+    actionScores = [self.getValue(successorState, self.depth, 1)
+                    for successorState in successorStates]
+    bestScore = max(actionScores)
+    bestIndices = [index
+                   for index in range(len(actionScores))
+                   if actionScores[index] == bestScore]
+    chosenIndex = random.choice(bestIndices)
+    return legalActions[chosenIndex]
+
+  def getValue(self, gameState, depth, agentIndex):
+
+    legalActions = gameState.getLegalActions(agentIndex)
+
+    if (depth == 0 or (not legalActions)):
+      return self.evaluationFunction(gameState)
+
+    successorStates = [gameState.generateSuccessor(agentIndex, action)
+                       for action in legalActions]
+
+    if (agentIndex == (gameState.getNumAgents() - 1)):
+      "decrement depth for last agent"
+      nextDepth = depth - 1
+      nextAgent =  0
+    else:
+      nextDepth = depth
+      nextAgent = agentIndex + 1
+
+    values = [self.getValue(successorState, nextDepth, nextAgent)
+              for successorState in successorStates]
+
+    if (agentIndex == 0):
+      return max(values)
+    else:
+      return min(values)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
