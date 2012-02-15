@@ -186,7 +186,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     legalActions = gameState.getLegalActions()
     successorStates = [gameState.generateSuccessor(0, action)
                        for action in legalActions]
-    actionScores = [self.getValue(successorState, None, None,
+    actionScores = [self.getValue(successorState, -sys.maxint-1, sys.maxint,
                                   self.depth, 1)
                     for successorState in successorStates]
     bestScore = max(actionScores)
@@ -200,7 +200,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     legalActions = gameState.getLegalActions(agentIndex)
 
-    if (depth == 0 or (not legalActions)):
+    if ((depth == 0) or (not legalActions) or 
+        (gameState.isWin()) or (gameState.isLose())):
       return self.evaluationFunction(gameState)
 
     "prepare recursive call"
@@ -216,38 +217,30 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     
     if (agentIndex == 0):
       "max-value"
-      v = None
+      v = -sys.maxint-1
       for successorState in successorStates:
-        v = max(v, self.getValue(successorState, alpha, beta,
-                                 nextDepth, nextAgent))
-        if (v >= beta or (beta == None)):
-          return v
-        if (alpha == None):
-          alpha = v
-        else:
-          alpha = max(alpha, v)
-      return v
-    else: 
-      "if (agentIndex == 1):"
-      "min-value expecting pacman"
-      v = None
-      for successorState in successorStates:
-        v = min(v, self.getValue(successorState, alpha, beta,
-                                 nextDepth, nextAgent))
-        if (v <= alpha or (alpha == None)):
-          return v
-        if (beta == None):
-          beta = v
-        else:
-          beta = min(beta, v)
-      return v
-    """
-    else:
-      values = [self.getValue(successorState, alpha, beta, nextDepth, nextAgent)
-                for successorState in successorStates]
-      return min(values)
-    """
+        stateValue = self.getValue(successorState, alpha, beta,
+                                   nextDepth, nextAgent)
+        v = max(v, stateValue)
 
+        if (v >= beta):
+          return v
+        alpha = max(alpha, v)
+      return v
+
+    else: 
+      "min-value expecting pacman"
+      v = sys.maxint
+      for successorState in successorStates:
+        stateValue = self.getValue(successorState, alpha, beta,
+                                   nextDepth, nextAgent)
+        v = min(v, stateValue)
+
+        if (v <= alpha):
+          return v
+        beta = min(beta, v)
+        
+      return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
