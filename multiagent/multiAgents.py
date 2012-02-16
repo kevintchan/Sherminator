@@ -257,7 +257,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     legalActions = gameState.getLegalActions()
     successorStates = [gameState.generateSuccessor(0, action)
                        for action in legalActions]
-    actionScores = [self.getValue(successorState, self.depth, True)
+    actionScores = [self.getValue(successorState, self.depth, False, 0)
                     for successorState in successorStates]
     bestScore = max(actionScores)
     bestIndices = [index
@@ -266,49 +266,90 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     chosenIndex = random.choice(bestIndices)
     return legalActions[chosenIndex]
 
-  def getValue(self, gameState, depth, isPacman):
+  def maxValues(self, gameState, depth):
+    legalActions = gameState.getLegalActions(0)
+    successorStates = [gameState.generateSuccessor(0, action) for action in legalActions]
+    actionScores = [self.getValue(successorState, depth - 1, True, 1) for successorState in successorStates]
+    return max(actionScores)
 
-    legalActions = True
-
-    if not isPacman:
-      legalActions = gameState.getLegalActions(0)
-      successorStates = [gameState.generateSuccessor(0, action)
-                       for action in legalActions]
-      nextDepth = depth - 1
-      isPacman = True
+  def expValues(self, gameState, depth, agentNum):
+    numOfGhosts = gameState.getNumAgents() - 1
+    if agentNum is numOfGhosts:
+      nextAgentIsGhost = False;
     else:
-      successorStates = self.expMinMaxHelper(gameState)
-      nextDepth = depth
-      isPacman = False
+      nextAgentIsGhost = True;
+    legalActions = gameState.getLegalActions(agentNum)
+    numLegalActions = len(legalActions)
+    successorStates = [gameState.generateSuccessor(agentNum, action) for action in legalActions]
+    actionScores = [self.getValue(successorState, depth, nextAgentIsGhost, agentNum) for successorState in successorStates]
+    scoreSum = sum(actionScores)
+    return (scoreSum/numLegalActions)
+    
 
+  def getValue(self, gameState, depth, isGhost, agentNum):
+    legalActions = gameState.getLegalActions()
     if (depth == 0 or (not legalActions)):
       return self.evaluationFunction(gameState)
-
-    values = [self.getValue(successorState, nextDepth, isPacman)
-              for successorState in successorStates]
-
-    if isPacman:
-      return max(values)
+    elif not isGhost:
+      return self.maxValues(gameState, depth)
     else:
-      return (sum(values)/len(values))
+      return self.expValues(gameState, depth, agentNum + 1)
 
-
-  def expMinMaxHelper(self, gameState):
-    numOfGhosts = gameState.getNumAgents() - 1
-    possibleNextGameStates = [gameState]
-    newPossibleNextGameStates = []
-    for ghostNum in range(1, numOfGhosts + 1):
-      for state in possibleNextGameStates:
-        ghostLegalActs = state.getLegalActions(ghostNum)
-        if len(ghostLegalActs) is not 0:
-          for action in ghostLegalActs:
-            newState = state.generateSuccessor(ghostNum, action)
-            newPossibleNextGameStates.append(newState)
-        else:
-          newPossibleNextGameStates = possibleNextGameStates[:]
-      possibleNextGameStates = newPossibleNextGameStates[:]
-      newPossibleNextGameStates = []
-    return possibleNextGameStates
+##    legalActions = gameState.getLegalActions()
+##    successorStates = [gameState.generateSuccessor(0, action)
+##                       for action in legalActions]
+##    actionScores = [self.getValue(successorState, self.depth, True)
+##                    for successorState in successorStates]
+##    bestScore = max(actionScores)
+##    bestIndices = [index
+##                   for index in range(len(actionScores))
+##                   if actionScores[index] == bestScore]
+##    chosenIndex = random.choice(bestIndices)
+##    return legalActions[chosenIndex]
+##
+##  def getValue(self, gameState, depth, isPacman):
+##
+##    legalActions = True
+##
+##    if not isPacman:
+##      legalActions = gameState.getLegalActions(0)
+##      successorStates = [gameState.generateSuccessor(0, action)
+##                       for action in legalActions]
+##      nextDepth = depth - 1
+##      isPacman = True
+##    else:
+##      successorStates = self.expMinMaxHelper(gameState)
+##      nextDepth = depth
+##      isPacman = False
+##
+##    if (depth == 0 or (not legalActions)):
+##      return self.evaluationFunction(gameState)
+##
+##    values = [self.getValue(successorState, nextDepth, isPacman)
+##              for successorState in successorStates]
+##
+##    if isPacman:
+##      return max(values)
+##    else:
+##      return (sum(values)/len(values))
+##
+##
+##  def expMinMaxHelper(self, gameState):
+##    numOfGhosts = gameState.getNumAgents() - 1
+##    possibleNextGameStates = [gameState]
+##    newPossibleNextGameStates = []
+##    for ghostNum in range(1, numOfGhosts + 1):
+##      for state in possibleNextGameStates:
+##        ghostLegalActs = state.getLegalActions(ghostNum)
+##        if len(ghostLegalActs) is not 0:
+##          for action in ghostLegalActs:
+##            newState = state.generateSuccessor(ghostNum, action)
+##            newPossibleNextGameStates.append(newState)
+##        else:
+##          newPossibleNextGameStates = possibleNextGameStates[:]
+##      possibleNextGameStates = newPossibleNextGameStates[:]
+##      newPossibleNextGameStates = []
+##    return possibleNextGameStates
 
 
 
