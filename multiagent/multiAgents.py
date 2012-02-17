@@ -75,7 +75,7 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "determine if in range of ghost"
-    distToNearestGhost = self.distToNearestPos(newPos, newGhostPositions)
+    distToNearestGhost = distToNearestPos(newPos, newGhostPositions)
     if (distToNearestGhost < 2):
       return -1
     
@@ -83,21 +83,21 @@ class ReflexAgent(Agent):
       return 1
 
     if (newFood.asList()):
-      distToNearestFood = self.distToNearestPos(newPos, newFood.asList())
+      distToNearestFood = distToNearestPos(newPos, newFood.asList())
       returnVal = float(1) / float(distToNearestFood)
     else:
       returnVal = 2
 
     return returnVal
 
-  def distToNearestPos(self, pacmanPosition, positions):
-    minDist = None
-    for position in positions:
-      dist = distCalc(pacmanPosition, position)
-      if ((minDist == None) or dist < minDist):
-        minDist = dist
+def distToNearestPos(pacmanPosition, positions):
+  minDist = None
+  for position in positions:
+    dist = distCalc(pacmanPosition, position)
+    if ((minDist == None) or dist < minDist):
+      minDist = dist
     
-    return minDist
+  return minDist
 
 def distCalc(pos1, pos2):
   return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
@@ -360,8 +360,48 @@ def betterEvaluationFunction(currentGameState):
 
     DESCRIPTION: <write something here so we know what you did>
   """
-  "*** YOUR CODE HERE ***"
-  #util.raiseNotDefined()
+  pos = currentGameState.getPacmanPosition()
+  food = currentGameState.getFood()
+  numFood = currentGameState.getNumFood()
+  ghostStates = currentGameState.getGhostStates()
+  ghostPositions = [ghostState.getPosition() for ghostState in ghostStates]
+  scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+  numCapsules = len(currentGameState.getCapsules())
+  
+  ghostsScared = True
+  for scaredTime in scaredTimes:
+    if (scaredTime == 0):
+      ghostsScared = False
+      break
+
+  maxScore = 10000
+  minScore = -2000
+  foodWeight = 40
+  distWeight = 0
+  capsuleWeight = 100
+
+  "determine if in range of ghost"
+  distToNearestGhost = distToNearestPos(pos, ghostPositions)
+  if (distToNearestGhost < 1 and (not ghostsScared)):
+    return minScore
+    
+  if (food.asList()):
+    distToNearestFood = distToNearestPos(pos, food.asList())
+    distFactor = float(1) / float(distToNearestFood)
+    foodFactor = float(1) / float(numFood)
+    if (numCapsules > 0):
+      capsuleFactor = float(1) / float(numCapsules)
+    else:
+      capsuleFactor = 2
+    
+    returnVal = (distWeight*distFactor +
+                 foodWeight*foodFactor + 
+                 capsuleWeight*capsuleFactor)
+
+  else:
+    returnVal = maxScore
+  return returnVal 
+
 
 # Abbreviation
 better = betterEvaluationFunction
