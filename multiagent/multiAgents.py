@@ -269,19 +269,21 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
   def maxValues(self, gameState, depth):
     legalActions = gameState.getLegalActions(0)
     successorStates = [gameState.generateSuccessor(0, action) for action in legalActions]
-    actionScores = [self.getValue(successorState, depth - 1, True, 0) for successorState in successorStates]
+    actionScores = [self.getValue(successorState, depth, True, 0) for successorState in successorStates]
     return max(actionScores)
 
   def expValues(self, gameState, depth, agentNum):
     numOfGhosts = gameState.getNumAgents() - 1
+    newDepth = depth
     if agentNum is numOfGhosts:
       nextAgentIsGhost = False;
+      newDepth = depth - 1
     else:
       nextAgentIsGhost = True;
     legalActions = gameState.getLegalActions(agentNum)
     numLegalActions = len(legalActions)
     successorStates = [gameState.generateSuccessor(agentNum, action) for action in legalActions]
-    actionScores = [self.getValue(successorState, depth, nextAgentIsGhost, agentNum) for successorState in successorStates]
+    actionScores = [self.getValue(successorState, newDepth, nextAgentIsGhost, agentNum) for successorState in successorStates]
     scoreSum = sum(actionScores)
     return (scoreSum/numLegalActions)
     
