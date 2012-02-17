@@ -243,9 +243,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
-  """
-    Your expectimax agent (question 4)
-  """
 
   def getAction(self, gameState):
     """
@@ -254,7 +251,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       All ghosts should be modeled as choosing uniformly at random from their
       legal moves.
     """
-    "*** YOUR CODE HERE ***"
 
     legalActions = gameState.getLegalActions()
     successorStates = [gameState.generateSuccessor(0, action)
